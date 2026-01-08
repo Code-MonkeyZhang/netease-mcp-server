@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from auth import check_login_status, login_via_qrcode
 from api import get_daily_recommendations, get_user_playlists, search_song
+from control import control_media
 
 # 初始化 MCP Server
 mcp = FastMCP("Netease-OpenAPI-Music")
@@ -135,6 +136,53 @@ def netease_play(id: str, type: str = "song"):
         
     except Exception as e:
         return f"播放失败: {e}"
+
+# === Media Control Tools ===
+
+@mcp.tool()
+def netease_pause():
+    """
+    暂停/继续播放 (Toggle Play/Pause)
+    """
+    if control_media("play_pause"):
+        return "已执行暂停/播放操作"
+    return "操作失败"
+
+@mcp.tool()
+def netease_next():
+    """
+    播放下一首 (Next Track)
+    """
+    if control_media("next"):
+        return "已切换下一首"
+    return "操作失败"
+
+@mcp.tool()
+def netease_previous():
+    """
+    播放上一首 (Previous Track)
+    """
+    if control_media("previous"):
+        return "已切换上一首"
+    return "操作失败"
+
+@mcp.tool()
+def netease_volume_up():
+    """
+    调大音量 (Volume Up)
+    """
+    if control_media("volume_up"):
+        return "音量已调大"
+    return "操作失败"
+
+@mcp.tool()
+def netease_volume_down():
+    """
+    调小音量 (Volume Down)
+    """
+    if control_media("volume_down"):
+        return "音量已调小"
+    return "操作失败"
 
 if __name__ == "__main__":
     mcp.run()

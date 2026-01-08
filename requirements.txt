@@ -4,3 +4,4 @@ pyncm
 qrcode
 Pillow
 requests
+pyautogui
