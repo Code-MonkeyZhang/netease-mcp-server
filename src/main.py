@@ -107,7 +107,11 @@ def netease_play(id: str, type: str = "song"):
         
         logger.info(f"Generated Play URL: {url}")
         
-        subprocess.run(["open", url])
+        if sys.platform == 'win32':
+            os.startfile(url)
+        else:
+            subprocess.run(["open", url])
+            
         return f"已发送播放指令: {type} {id}"
         
     except Exception as e:

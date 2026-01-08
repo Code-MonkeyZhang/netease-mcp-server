@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import json
 import logging
@@ -94,7 +95,10 @@ def login_via_qrcode():
         
         # 3. 弹窗显示二维码
         logger.info(f"正在打开二维码: {qr_path}")
-        subprocess.run(["open", qr_path])
+        if sys.platform == 'win32':
+            os.startfile(qr_path)
+        else:
+            subprocess.run(["open", qr_path])
         
         # 4. 轮询检查状态
         logger.info("等待扫码...")
