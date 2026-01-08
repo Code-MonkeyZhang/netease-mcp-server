@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Sensitive Data (Cookies & Sessions)
+src/storage/*.json
+src/storage/*.ncm
+src/storage/*.png
+
+# Logs
+*.log
+
+# Mac
+.DS_Store
