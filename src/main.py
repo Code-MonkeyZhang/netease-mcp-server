@@ -9,18 +9,20 @@ import base64
 # 确保能导入同级模块
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from log import setup_logging
 from auth import check_login_status, login_via_qrcode
 from api import get_daily_recommendations, get_user_playlists, search_song
 
+# 配置日志 (初始化)
+logger = setup_logging("main")
+
 # 初始化 MCP Server
 mcp = FastMCP("Netease-OpenAPI-Music")
-logger = logging.getLogger(__name__)
-
-# ... (omitted previous tools) ...
 
 @mcp.tool()
 def netease_status():
     """检查网易云音乐当前是否已登录"""
+    logger.info("Calling netease_status")
     status = check_login_status()
     if status['logged_in']:
         return f"已登录，当前用户: {status['nickname']}"
@@ -35,6 +37,7 @@ def netease_login():
     请用网易云音乐 App 扫描该二维码。
     扫描成功后，工具会自动保存登录状态。
     """
+    logger.info("Calling netease_login")
     return login_via_qrcode()
 
 @mcp.tool()
@@ -43,6 +46,7 @@ def netease_get_daily_recommend():
     获取今日推荐歌曲
     返回歌曲列表 (包含 ID, 歌名, 歌手)
     """
+    logger.info("Calling netease_get_daily_recommend")
     result = get_daily_recommendations()
     if result['success']:
         # 格式化输出以便阅读
@@ -58,6 +62,7 @@ def netease_my_playlists():
     """
     获取我的歌单 (包括创建的歌单和红心歌单)
     """
+    logger.info("Calling netease_my_playlists")
     result = get_user_playlists()
     if result['success']:
         text = "我的歌单:\n"
@@ -75,6 +80,7 @@ def netease_search(keyword: str):
     args:
         keyword: 歌名或歌手
     """
+    logger.info(f"Calling netease_search with keyword: {keyword}")
     result = search_song(keyword)
     if result['success']:
         return result['songs']
@@ -89,6 +95,7 @@ def netease_play(id: str, type: str = "song"):
         id: 歌曲ID 或 歌单ID
         type: 'song' (单曲) 或 'playlist' (歌单)
     """
+    logger.info(f"Calling netease_play with id: {id}, type: {type}")
     try:
         # 构造 JSON 指令
         command = {
@@ -99,7 +106,7 @@ def netease_play(id: str, type: str = "song"):
         
         # 序列化并 Base64 编码
         json_str = json.dumps(command, separators=(',', ':'))
-        encoded = base64.b64bencode(json_str.encode('utf-8')).decode('utf-8')
+        encoded = base64.b64encode(json_str.encode('utf-8')).decode('utf-8')
         
         # 生成客户端 URL Scheme
         app_url = f"orpheus://{encoded}"
@@ -134,4 +141,8 @@ def netease_play(id: str, type: str = "song"):
             return f"⚠️ 未检测到客户端，已在浏览器中播放: {web_url}"
         
     except Exception as e:
+        logger.error(f"播放失败: {e}")
         return f"播放失败: {e}"
+
+if __name__ == "__main__":
+    mcp.run()

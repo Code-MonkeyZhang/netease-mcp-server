@@ -15,6 +15,7 @@ src/storage/*.png
 
 # Logs
 *.log
+logs/
 
 # Mac
 .DS_Store

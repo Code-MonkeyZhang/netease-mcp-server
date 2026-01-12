@@ -11,10 +11,7 @@ import qrcode
 from PIL import Image
 
 # 配置日志
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# 定义 Session 存储路径
+logger = logging.getLogger(__name__)# 定义 Session 存储路径
 STORAGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "storage")
 COOKIE_FILE = os.path.join(STORAGE_DIR, "cookies.json")
 
