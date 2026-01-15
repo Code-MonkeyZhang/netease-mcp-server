@@ -2,16 +2,13 @@ import os
 import sys
 import time
 import json
-import logging
-import threading
 import subprocess
 from pyncm import apis
 from pyncm import GetCurrentSession, SetCurrentSession
 import qrcode
 from PIL import Image
 
-# 配置日志
-logger = logging.getLogger(__name__)# 定义 Session 存储路径
+# 定义 Session 存储路径
 STORAGE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "storage")
 COOKIE_FILE = os.path.join(STORAGE_DIR, "cookies.json")
 
@@ -29,20 +26,14 @@ def load_session():
                 # 更新当前 Session 的 cookies
                 GetCurrentSession().cookies.update(cookies)
             
-            # Debug
-            logger.info(f"Loaded cookies: {list(cookies.keys())}")
-
             # 验证 Session 是否有效 (获取用户信息)
             user_info = apis.login.GetCurrentLoginStatus()
             
             if user_info['code'] == 200 and user_info['profile']:
-                logger.info(f"Session 加载成功，用户: {user_info['profile']['nickname']}")
                 return True, user_info['profile']['nickname']
             else:
-                logger.warning(f"Session 已失效: {user_info}")
                 return False, None
         except Exception as e:
-            logger.error(f"加载 Session 失败: {e}")
             return False, None
     return False, None
 
@@ -54,10 +45,8 @@ def save_session():
         cookies = GetCurrentSession().cookies.get_dict()
         with open(COOKIE_FILE, 'w') as f:
             json.dump(cookies, f)
-        logger.info("Cookies 已保存")
         return True
     except Exception as e:
-        logger.error(f"保存 Cookies 失败: {e}")
         return False
 
 def check_login_status():
@@ -77,7 +66,6 @@ def login_via_qrcode():
             return {"success": False, "message": "获取二维码失败"}
         
         uuid = result['unikey']
-        logger.info(f"获取到登录 UUID: {uuid}")
         
         # 2. 生成二维码链接和图片
         qr_content = f"https://music.163.com/login?codekey={uuid}"
@@ -91,14 +79,12 @@ def login_via_qrcode():
         img.save(qr_path)
         
         # 3. 弹窗显示二维码
-        logger.info(f"正在打开二维码: {qr_path}")
         if sys.platform == 'win32':
             os.startfile(qr_path)
         else:
             subprocess.run(["open", qr_path])
         
         # 4. 轮询检查状态
-        logger.info("等待扫码...")
         max_retries = 60 # 2分钟超时
         for _ in range(max_retries):
             result = apis.login.LoginQrcodeCheck(uuid)
@@ -107,8 +93,6 @@ def login_via_qrcode():
             if code == 800:
                 return {"success": False, "message": "二维码已过期，请重试"}
             elif code == 803:
-                logger.info(f"扫码成功，返回数据: {result}")
-                
                 # 重要: 确保 cookies 被正确捕获
                 # 如果返回结果里有 cookie，先写入
                 if 'cookie' in result:
@@ -121,7 +105,6 @@ def login_via_qrcode():
                     nickname = user_info['profile']['nickname'] if user_info.get('profile') else "用户"
                     return {"success": True, "message": f"登录成功！欢迎回来，{nickname}", "nickname": nickname}
                 except Exception as e:
-                    logger.warning(f"获取用户信息失败: {e}")
                     return {"success": True, "message": "登录成功，但无法获取用户信息", "nickname": "用户"}
             
             time.sleep(2)
@@ -129,5 +112,4 @@ def login_via_qrcode():
         return {"success": False, "message": "登录超时"}
         
     except Exception as e:
-        logger.error(f"登录流程出错: {e}")
         return {"success": False, "message": f"错误: {str(e)}"}

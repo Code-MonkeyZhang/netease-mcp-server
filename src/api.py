@@ -1,9 +1,6 @@
-import logging
 import pyncm
 from pyncm import apis
 from auth import load_session
-
-logger = logging.getLogger(__name__)
 
 def get_daily_recommendations():
     """获取每日推荐歌曲"""
@@ -33,7 +30,6 @@ def get_daily_recommendations():
         else:
             return {"success": False, "error": f"API 错误: {result.get('message', '未知错误')}"}
     except Exception as e:
-        logger.error(f"获取每日推荐失败: {e}")
         return {"success": False, "error": str(e)}
 
 def get_user_playlists():

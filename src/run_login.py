@@ -9,6 +9,5 @@ from auth import login_via_qrcode
 
 if __name__ == "__main__":
     setup_logging("run_login")
-    print("Starting login process...")
     result = login_via_qrcode()
     print(result)
