@@ -49,13 +49,10 @@ def setup_logging(name: str = "cloud_music_mcp"):
     )
 
     # 5. File Handler
-    # 不再使用 RotatingFileHandler 覆盖同一个文件，而是每次新文件
-    # 但为了防止单次运行日志过大，还是可以用 FileHandler 或 RotatingFileHandler (单文件不轮转)
     file_handler = logging.FileHandler(log_file, encoding="utf-8")
     file_handler.setFormatter(formatter)
     root_logger.addHandler(file_handler)
 
-    # 6. 抑制过于啰嗦的库日志
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("PIL").setLevel(logging.WARNING)
 
